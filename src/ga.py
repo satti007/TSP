@@ -1,42 +1,79 @@
+import time
+import operator
+import numpy as np
 from utils import *
 from sys import stdout
-import numpy as np
+from pprint import pprint
+import matplotlib.pyplot as plt
 
+# returns children after mutation of dim (popSize x numPoints)
 def mutation(childPopulation, mutateProb, popSize):
-#returns children after mutation of dim popSize x numPoints
+	mutPopulation = [None]*popSize
+	
 	for i in range(popSize):
-		if np.random.random() < mutateProb:
-			childPopulation[i] = mutationUtil(childPopulation[i], mutateProb)
+		mutPopulation[i] = mutateUtil(childPopulation[i], mutateProb)
+	
+	return mutPopulation
 
-	return childPopulation
-
-def crossOver(selPopulation, popSize):
-#returns children after cross-over of dim popSize x numPoints
-	selPopulation1, selPopulation2 = selPopulation[:popSize/2], selPopulation[popSize/2:]
+# returns children after cross-over of dim (popSize x numPoints)
+def crossOver(selPopulation, popSize, numPoints, eliteSize):
 	childPopulation = [None]*popSize
-	for x in xrange(popSize/2):
-		childPopulation[x], childPopulation[x+(popSize/2)] = crossOverUtil(selPopulation1[x],selPopulation2[x])
+	
+	for i in range(eliteSize):
+		childPopulation[i] = selPopulation[i]
+	
+	random.shuffle(selPopulation)
+	for i in range(popSize - eliteSize):
+		childPopulation[eliteSize + i] = crossOverUtil(selPopulation[i],selPopulation[popSize-i-1])
 	
 	return childPopulation
 
-def selection(population,numPoints,pointDist,popSize,eliteSize):
-#returns a selected population of dim popSize x numPoints
+# returns a selected population of dim (popSize x numPoints)
+def selection(population, numPoints, pointDist, popSize, eliteSize):
+	selPopulation = [None]*popSize
+	routeTofit = getFitness(population, pointDist)
+	selProb    = selectProbability(routeTofit)
+	routeTofit = sorted(routeTofit.items(),key = operator.itemgetter(1),reverse = True)
+	
+	for i in range(eliteSize):
+		selPopulation[i] = population[routeTofit[i][0]]
 
+	for i in range(popSize - eliteSize):
+		idx = np.random.choice(range(popSize), p = selProb)
+		selPopulation[eliteSize+i] = population[idx]
+	
+	return selPopulation
+
+# returns a random population of dim (popSize x numPoints)
 def initPopulation(numPoints, popSize):
-#returns a random population of dim popSize x numPoints
+	randomPop = [None]*popSize
+	for i in range(0,popSize):
+		randomPop[i] = randomRoute(numPoints)
 
-def geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations):
+	return randomPop
 
+# Genetic Algorithm
+def geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,startTime):
+	genCosts = []
 	pop = initPopulation(numPoints, popSize)
-	while True:
+	minCost, bestRouteId = bestRoute(pop,pointDist)
+	print '0', minCost
+	genCosts.append(minCost)
+	printRoute(pop[bestRouteId])
+	
+	while time.time() - startTime < 10:
+	# while True:
 		for gen in range(0,generations):
-			pop = selection(pop,numPoints,pointDist,popSize,eliteSize)
-			pop = crossOver(pop, popSize)
-			pop = mutation(pop, mutateProb, popSize)
+			pop = selection(pop, numPoints, pointDist, popSize, eliteSize)
+			pop = crossOver(pop, popSize, numPoints, eliteSize)
+			pop = mutation(pop,  mutateProb, popSize)
+			minCost, bestRouteId = bestRoute(pop,pointDist)
+			print gen+1, minCost
+			genCosts.append(minCost)
+			printRoute(pop[bestRouteId])
 			stdout.flush()
-			if gen == 10:
-				break
-		break
-
-
-
+	
+	plt.plot(genCosts)
+	plt.ylabel('cost')
+	plt.xlabel('generation')
+	plt.show()

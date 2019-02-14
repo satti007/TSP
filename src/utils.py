@@ -1,44 +1,63 @@
+#define your helper functions
+import random
 import numpy as np
 
-#define your helper functions
-
-def crossOverUtil(selTour1, selTour2):
-	#returns children of dim numPoints
-	indices = np.random.randint(high=len(selTour1), size=2)
-	low, high = min(indices), max(indices)
-	gene1 = selTour1[low:high+1]
-	child1 = [None]*len(selTour1)
-	child1[low:high+1] = gene1
-	for i,x in enumerate(selTour2):
-		if i<low or i>high:
-			if x not in gene1:
-				child1[i] = x
-		else:
-			continue
-
-	indices = np.random.randint(high=len(selTour1), size=2)
-	low, high = min(indices), max(indices)
-	gene2 = selTour2[low:high+1]
-	child2 = [None]*len(selTour2)
-	child2[low:high+1] = gene2
-
-	for i,x in enumerate(selTour1):
-		if i<low or i>high:
-			if x not in gene2:
-				child2[i] = x
-		else:
-			continue
-
-	return child1, child2
+def crossOverUtil(parent1, parent2):
+	child    = []
+	indices  = np.random.randint(low=0,high=len(parent1),size=2)
+	startidx = min(indices)
+	endidx   = max(indices)
+	
+	child = child + parent1[startidx:endidx+1]
+	child = child + [city for city in parent2 if city not in child]
+	
+	return child
 
 def mutateUtil(tour,mutateProb):
 	for i in range(len(tour)):
-		if np.random.random() < mutateProb/2:
-			ind = np.random.randint(high=len(tour))
+		if random.random() < mutateProb:
+			ind = np.random.randint(low=0,high=len(tour))
 			temp = tour[i]
 			tour[i] = tour[ind]
 			tour[ind] = temp
-
+	
 	return tour
 
+def randomRoute(numPoints):
+	return random.sample(range(0,numPoints),numPoints)
 
+def routeCost(route, pointDist, flag=None):
+	cost = 0.0
+	for i in range(0,len(route)-1):
+		cost = cost + pointDist[route[i]][route[i+1]]
+	
+	return cost
+
+def getFitness(population, pointDist):
+	routeTofit = {}
+	for idx,route in enumerate(population):
+		routeTofit[idx] = (1.0/routeCost(route, pointDist))
+	
+	return routeTofit
+
+def selectProbability(routeTofit):
+	total   = sum(routeTofit.itervalues())
+	selProb = [float(f)/total for r,f in routeTofit.iteritems()]
+	
+	return selProb
+
+def bestRoute(population,pointDist):
+	minCost     = float('inf')
+	bestRouteId = -1
+	for idx,route in enumerate(population):
+		currCost = routeCost(route,pointDist)
+		if minCost > currCost: 
+			minCost     = currCost
+			bestRouteId =  idx
+	
+	return minCost, bestRouteId
+
+def printRoute(route):
+	for city in route:
+		print city,
+	print ''

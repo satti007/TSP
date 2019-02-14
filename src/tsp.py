@@ -1,11 +1,16 @@
+import time
+startTime = time.time()
+
 import argparse
+import numpy as np
 from ga import *
+from pprint import pprint
 
 # Arguments Parser
 def get_arguments():
 	ap = argparse.ArgumentParser()
 	ap.add_argument('--popSize'    ,type=int,default=100)
-	ap.add_argument('--eliteSize'  ,type=int,default=10)
+	ap.add_argument('--eliteSize'  ,type=int,default=20)
 	ap.add_argument('--generations',type=int,default=500)
 	ap.add_argument('--mutateProb' ,type=float,default=0.01)
 	
@@ -32,18 +37,22 @@ def readInp():
 	isEuc     = get_isEuc(raw_input())
 	numPoints = int(raw_input())
 	
-	pointCoords = []
+	pointCoords = [None]*numPoints
 	for point in range(numPoints):
 		coords  = raw_input()
-		pointCoords.append([float(c) for c in coords.split(' ')])
+		coords  = coords.strip()
+		pointCoords[point] = [float(c) for c in coords.rsplit(' ')]
 	
-	pointDist = []
-	for i in range(numPoints):
+	pointDist = [None]*numPoints
+	for point in range(numPoints):
 		dist = raw_input()
-		pointDist.append([float(d) for d in dist.split(' ')])
+		dist = dist.strip()
+		pointDist[point] = [float(d) for d in dist.rsplit(' ')]
 	
 	return numPoints,pointCoords,pointDist
 
 numPoints,pointCoords,pointDist = readInp()
 popSize,eliteSize,mutateProb,generations = get_arguments()
-geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations)
+# pprint (pointCoords)
+# pprint (pointDist)
+geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,startTime)
