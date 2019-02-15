@@ -61,7 +61,7 @@ def geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,sta
 	genCosts.append(minCost)
 	printRoute(pop[bestRouteId])
 	
-	while time.time() - startTime < 10:
+	while time.time() - startTime < 300:
 	# while True:
 		for gen in range(0,generations):
 			pop = selection(pop, numPoints, pointDist, popSize, eliteSize)

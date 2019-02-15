@@ -14,13 +14,24 @@ def crossOverUtil(parent1, parent2):
 	return child
 
 def mutateUtil(tour,mutateProb):
-	for i in range(len(tour)):
-		if random.random() < mutateProb:
-			ind = np.random.randint(low=0,high=len(tour))
-			temp = tour[i]
-			tour[i] = tour[ind]
-			tour[ind] = temp
+	# for i in range(len(tour)):
+	# 	if random.random() < mutateProb:
+	# 		ind = np.random.randint(low=0,high=len(tour))
+	# 		temp = tour[i]
+	# 		tour[i] = tour[ind]
+	# 		tour[ind] = temp
 	
+	if random.random() < mutateProb:
+		maxlen = len(tour)
+		split_1, split_2 = np.random.randint(0, maxlen-1), np.random.randint(0, maxlen-1)
+		while split_2 == split_1:
+			split_2 = np.random.randint(0, maxlen-1)	
+		split_1, split_2 = min(split_1, split_2), max(split_1, split_2)
+
+		mid = tour[split_1:split_2+1]
+		mid.reverse()
+		return tour[:split_1] + mid + tour[split_2+1:]
+
 	return tour
 
 def randomRoute(numPoints):
