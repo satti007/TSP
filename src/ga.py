@@ -61,17 +61,16 @@ def geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,sta
 	genCosts.append(minCost)
 	printRoute(pop[bestRouteId])
 	
-	while time.time() - startTime < 300:
+	while time.time() - startTime < 30:
 	# while True:
-		for gen in range(0,generations):
-			pop = selection(pop, numPoints, pointDist, popSize, eliteSize)
-			pop = crossOver(pop, popSize, numPoints, eliteSize)
-			pop = mutation(pop,  mutateProb, popSize)
-			minCost, bestRouteId = bestRoute(pop,pointDist)
-			print gen+1, minCost
-			genCosts.append(minCost)
-			printRoute(pop[bestRouteId])
-			stdout.flush()
+		pop = selection(pop, numPoints, pointDist, popSize, eliteSize)
+		pop = crossOver(pop, popSize, numPoints, eliteSize)
+		pop = mutation(pop,  mutateProb, popSize)
+		minCost, bestRouteId = bestRoute(pop,pointDist)
+		print gen+1, minCost
+		genCosts.append(minCost)
+		printRoute(pop[bestRouteId])
+		stdout.flush()
 	
 	plt.plot(genCosts)
 	plt.ylabel('cost')

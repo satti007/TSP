@@ -11,7 +11,7 @@ def get_arguments():
 	ap = argparse.ArgumentParser()
 	ap.add_argument('--popSize'    ,type=int,default=100)
 	ap.add_argument('--eliteSize'  ,type=int,default=20)
-	ap.add_argument('--generations',type=int,default=500)
+	ap.add_argument('--greedySize' ,type=int,default=5)
 	ap.add_argument('--mutateProb' ,type=float,default=0.01)
 	
 	args = vars(ap.parse_args())
@@ -19,7 +19,6 @@ def get_arguments():
 	popSize     = args['popSize']
 	eliteSize   = args['eliteSize']
 	mutateProb  = args['mutateProb']
-	generations = args['generations']
 	
 	print '[INFO] Arguments Parsing Done!'
 	print '[INFO] Arguments details: '
@@ -53,6 +52,7 @@ def readInp():
 
 numPoints,pointCoords,pointDist = readInp()
 popSize,eliteSize,mutateProb,generations = get_arguments()
+geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,startTime)
+
 # pprint (pointCoords)
 # pprint (pointDist)
-geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,startTime)
