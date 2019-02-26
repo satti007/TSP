@@ -2,6 +2,29 @@
 import random
 import numpy as np
 
+def randomRoute(numPoints):
+	return random.sample(range(0,numPoints),numPoints)
+
+def greedyRoute(numPoints,pointDist):
+	start = random.randint(0,numPoints)
+	curr  = start
+	route = [start]
+	inRoute = { start : 1 }	
+	for i in range(numPoints-1):
+		minc = None
+		mind = float('inf')
+		for j in range(numPoints):
+			if j not in inRoute:
+				if pointDist[curr][j] < mind:
+					minc = j
+					mind = pointDist[curr][j]
+		
+		curr = minc
+		inRoute[minc] = 1
+		route.append(minc)
+	
+	return route
+
 def crossOverUtil(parent1, parent2):
 	child    = []
 	indices  = np.random.randint(low=0,high=len(parent1),size=2)
@@ -13,22 +36,19 @@ def crossOverUtil(parent1, parent2):
 	
 	return child
 
-def mutateUtil(tour,mutateProb):	
+def mutateUtil(route,mutateProb):	
 	if random.random() < mutateProb:
-		maxlen = len(tour)
+		maxlen = len(route)
 		split_1, split_2 = np.random.randint(0, maxlen-1), np.random.randint(0, maxlen-1)
 		while split_2 == split_1:
 			split_2 = np.random.randint(0, maxlen-1)	
 		split_1, split_2 = min(split_1, split_2), max(split_1, split_2)
 		
-		mid = tour[split_1:split_2+1]
+		mid = route[split_1:split_2+1]
 		mid.reverse()
-		return tour[:split_1] + mid + tour[split_2+1:]
+		return route[:split_1] + mid + route[split_2+1:]
 	
-	return tour
-
-def randomRoute(numPoints):
-	return random.sample(range(0,numPoints),numPoints)
+	return route
 
 def routeCost(route, pointDist, flag=None):
 	cost = 0.0
@@ -67,9 +87,9 @@ def printRoute(route):
 	print ''
 
 
-# for i in range(len(tour)):
+# for i in range(len(route)):
 # 	if random.random() < mutateProb:
-# 		ind = np.random.randint(low=0,high=len(tour))
-# 		temp = tour[i]
-# 		tour[i] = tour[ind]
-# 		tour[ind] = temp
+# 		ind = np.random.randint(low=0,high=len(route))
+# 		temp = route[i]
+# 		route[i] = route[ind]
+# 		route[ind] = temp

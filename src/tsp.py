@@ -4,28 +4,30 @@ startTime = time.time()
 import argparse
 import numpy as np
 from ga import *
-from pprint import pprint
 
 # Arguments Parser
 def get_arguments():
 	ap = argparse.ArgumentParser()
 	ap.add_argument('--popSize'    ,type=int,default=100)
 	ap.add_argument('--eliteSize'  ,type=int,default=20)
-	ap.add_argument('--greedySize' ,type=int,default=5)
+	ap.add_argument('--greedySize' ,type=int,default=4)
+	ap.add_argument('--crossFun'   ,type=str,default='oc')
 	ap.add_argument('--mutateProb' ,type=float,default=0.01)
 	
 	args = vars(ap.parse_args())
 	
 	popSize     = args['popSize']
 	eliteSize   = args['eliteSize']
+	greedySize  = args['greedySize']
+	crossFun    = args['crossFun']
 	mutateProb  = args['mutateProb']
 	
 	print '[INFO] Arguments Parsing Done!'
 	print '[INFO] Arguments details: '
-	print 'popSize,eliteSize       : ',popSize,eliteSize
-	print 'mutateProb,generations  : ',mutateProb,generations
+	print 'popSize,eliteSize,greedySize : ',popSize,eliteSize,greedySize
+	print 'crossFun,mutateProb          : ',crossFun,mutateProb
 	
-	return popSize,eliteSize,mutateProb,generations
+	return popSize,eliteSize,greedySize,crossFun,mutateProb
 
 def get_isEuc(distType):
 	if 'non' in distType:
@@ -51,8 +53,9 @@ def readInp():
 	return numPoints,pointCoords,pointDist
 
 numPoints,pointCoords,pointDist = readInp()
-popSize,eliteSize,mutateProb,generations = get_arguments()
-geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,startTime)
+popSize,eliteSize,greedySize,crossFun,mutateProb = get_arguments()
+geneticAlgo(numPoints,pointDist,popSize,eliteSize,greedySize,crossFun,mutateProb,startTime)
 
+# from pprint import pprint
 # pprint (pointCoords)
 # pprint (pointDist)

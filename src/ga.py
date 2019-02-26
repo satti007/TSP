@@ -1,3 +1,4 @@
+import os
 import time
 import operator
 import numpy as np
@@ -7,7 +8,7 @@ from pprint import pprint
 import matplotlib.pyplot as plt
 
 # returns children after mutation of dim (popSize x numPoints)
-def mutation(childPopulation, mutateProb, popSize):
+def mutation(childPopulation,mutateProb,popSize):
 	mutPopulation = [None]*popSize
 	
 	for i in range(popSize):
@@ -16,7 +17,7 @@ def mutation(childPopulation, mutateProb, popSize):
 	return mutPopulation
 
 # returns children after cross-over of dim (popSize x numPoints)
-def crossOver(selPopulation, popSize, numPoints, eliteSize):
+def crossOver(selPopulation,popSize,numPoints,eliteSize):
 	childPopulation = [None]*popSize
 	
 	for i in range(eliteSize):
@@ -29,7 +30,7 @@ def crossOver(selPopulation, popSize, numPoints, eliteSize):
 	return childPopulation
 
 # returns a selected population of dim (popSize x numPoints)
-def selection(population, numPoints, pointDist, popSize, eliteSize):
+def selection(population,numPoints,pointDist,popSize,eliteSize):
 	selPopulation = [None]*popSize
 	routeTofit = getFitness(population, pointDist)
 	selProb    = selectProbability(routeTofit)
@@ -44,34 +45,42 @@ def selection(population, numPoints, pointDist, popSize, eliteSize):
 	
 	return selPopulation
 
-# returns a random population of dim (popSize x numPoints)
-def initPopulation(numPoints, popSize):
-	randomPop = [None]*popSize
-	for i in range(0,popSize):
+# returns a random population of dim ([popSize] x numPoints)
+def initPopulation(numPoints,pointDist,popSize,greedySize):
+	randomPop = [None]*(popSize - greedySize)
+	greedyPop = [None]*greedySize
+	for i in range(0,popSize - greedySize):
 		randomPop[i] = randomRoute(numPoints)
-
-	return randomPop
+	
+	for i in range(0,greedySize):
+		greedyPop[i] = greedyRoute(numPoints,pointDist)
+	
+	return randomPop + greedyPop
 
 # Genetic Algorithm
-def geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,startTime):
+def geneticAlgo(numPoints,pointDist,popSize,eliteSize,greedySize,crossFun,mutateProb,startTime):
 	genCosts = []
-	pop = initPopulation(numPoints, popSize)
+	pop = initPopulation(numPoints,pointDist,popSize,greedySize)
 	minCost, bestRouteId = bestRoute(pop,pointDist)
 	print '0', minCost
 	genCosts.append(minCost)
-	printRoute(pop[bestRouteId])
+	# printRoute(pop[bestRouteId])
 	
-	while time.time() - startTime < 30:
+	gen = 0
+	while time.time() - startTime < 10:
 	# while True:
+	# for gen in range(1000):
 		pop = selection(pop, numPoints, pointDist, popSize, eliteSize)
 		pop = crossOver(pop, popSize, numPoints, eliteSize)
 		pop = mutation(pop,  mutateProb, popSize)
 		minCost, bestRouteId = bestRoute(pop,pointDist)
 		print gen+1, minCost
 		genCosts.append(minCost)
-		printRoute(pop[bestRouteId])
+		# printRoute(pop[bestRouteId])
 		stdout.flush()
+		gen += 1 
 	
+	os.system('rm *.pyc')
 	plt.plot(genCosts)
 	plt.ylabel('cost')
 	plt.xlabel('generation')
