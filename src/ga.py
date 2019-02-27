@@ -1,4 +1,3 @@
-import os
 import time
 import operator
 import numpy as np
@@ -7,8 +6,11 @@ from sys import stdout
 from pprint import pprint
 import matplotlib.pyplot as plt
 
+np.random.seed(26)
+random.seed(26)
+
 # returns children after mutation of dim (popSize x numPoints)
-def mutation(childPopulation,mutateProb,popSize):
+def mutation(childPopulation, mutateProb, popSize):
 	mutPopulation = [None]*popSize
 	
 	for i in range(popSize):
@@ -17,7 +19,7 @@ def mutation(childPopulation,mutateProb,popSize):
 	return mutPopulation
 
 # returns children after cross-over of dim (popSize x numPoints)
-def crossOver(selPopulation,popSize,numPoints,eliteSize):
+def crossOver(selPopulation, popSize, numPoints, eliteSize):
 	childPopulation = [None]*popSize
 	
 	for i in range(eliteSize):
@@ -30,7 +32,7 @@ def crossOver(selPopulation,popSize,numPoints,eliteSize):
 	return childPopulation
 
 # returns a selected population of dim (popSize x numPoints)
-def selection(population,numPoints,pointDist,popSize,eliteSize):
+def selection(population, numPoints, pointDist, popSize, eliteSize):
 	selPopulation = [None]*popSize
 	routeTofit = getFitness(population, pointDist)
 	selProb    = selectProbability(routeTofit)
@@ -57,30 +59,48 @@ def initPopulation(numPoints,pointDist,popSize,greedySize):
 	
 	return randomPop + greedyPop
 
+def elitePop(selPop,pop,numPoints,pointDist,eliteSize):
+	routeTofit1 = getFitness(selPop,pointDist)
+	routeTofit2 = getFitness(pop,pointDist)
+	routeTofit2 = sorted(routeTofit2.items(),key = operator.itemgetter(1),reverse = True)
+	routeTofit1 = sorted(routeTofit1.items(),key = operator.itemgetter(1),reverse = True)
+	population = []
+	for i in range(eliteSize):
+		population.append(pop[routeTofit2[i][0]])
+	
+	for i in range(eliteSize):
+		population.append(selPop[routeTofit1[i][0]])
+	
+	return population
+
+
+
 # Genetic Algorithm
-def geneticAlgo(numPoints,pointDist,popSize,eliteSize,greedySize,crossFun,mutateProb,startTime):
+def geneticAlgo(numPoints,pointDist,popSize,eliteSize,mutateProb,generations,startTime):
+	tourCost = float('inf')
 	genCosts = []
-	pop = initPopulation(numPoints,pointDist,popSize,greedySize)
+	pop = initPopulation(numPoints,pointDist,popSize,3)
 	minCost, bestRouteId = bestRoute(pop,pointDist)
 	print '0', minCost
 	genCosts.append(minCost)
 	# printRoute(pop[bestRouteId])
 	
-	gen = 0
-	while time.time() - startTime < 10:
+	while time.time() - startTime < 300:
 	# while True:
-	# for gen in range(1000):
-		pop = selection(pop, numPoints, pointDist, popSize, eliteSize)
-		pop = crossOver(pop, popSize, numPoints, eliteSize)
-		pop = mutation(pop,  mutateProb, popSize)
-		minCost, bestRouteId = bestRoute(pop,pointDist)
-		print gen+1, minCost
-		genCosts.append(minCost)
-		# printRoute(pop[bestRouteId])
-		stdout.flush()
-		gen += 1 
+		for gen in range(0,generations):
+			pop = selection(pop, numPoints, pointDist, popSize, eliteSize)
+			selPop = pop
+			pop = crossOver(pop, popSize, numPoints, eliteSize)
+			pop = mutation(pop,  mutateProb, popSize)
+			pop = elitePop(selPop,pop,numPoints,pointDist,eliteSize)
+			minCost, bestRouteId = bestRoute(pop,pointDist)
+			if tourCost > minCost:
+				print gen+1, minCost
+				tourCost = minCost
+				# printRoute(pop[bestRouteId])
+			genCosts.append(minCost)
+			stdout.flush()
 	
-	os.system('rm *.pyc')
 	plt.plot(genCosts)
 	plt.ylabel('cost')
 	plt.xlabel('generation')

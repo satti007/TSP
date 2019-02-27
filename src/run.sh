@@ -1,1 +1,1 @@
-python -W ignore tsp.py --popSize 200 --eliteSize 50 --greedySize 4  --crossFun oc --mutateProb 0.01
+python -W ignore tsp.py --popSize 200 --eliteSize 100 --mutateProb 0.4 --generations 1000

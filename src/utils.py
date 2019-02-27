@@ -2,8 +2,9 @@
 import random
 import numpy as np
 
-def randomRoute(numPoints):
-	return random.sample(range(0,numPoints),numPoints)
+np.random.seed(26)
+random.seed(26)
+
 
 def greedyRoute(numPoints,pointDist):
 	start = random.randint(0,numPoints)
@@ -25,30 +26,48 @@ def greedyRoute(numPoints,pointDist):
 	
 	return route
 
+
+def get_alt(m, hashmap):
+	while True:
+		if m not in hashmap:
+			break
+		m = hashmap[m]
+	return m
+
 def crossOverUtil(parent1, parent2):
-	child    = []
+	child    = [None]*len(parent1)
 	indices  = np.random.randint(low=0,high=len(parent1),size=2)
 	startidx = min(indices)
 	endidx   = max(indices)
+	# child = child + parent1[startidx:endidx+1]
+	# child = child + [city for city in parent2 if city not in child]
+	child [startidx:endidx+1] = parent1[startidx:endidx+1] 
 	
-	child = child + parent1[startidx:endidx+1]
-	child = child + [city for city in parent2 if city not in child]
+	map_1 = {}
+	for i in range(startidx, endidx+1):
+		map_1[parent1[i]] = parent2[i]
+	
+	for i in range(startidx) + range(endidx+1, len(parent1)):
+		child[i] = get_alt(parent2[i], map_1)
 	
 	return child
 
-def mutateUtil(route,mutateProb):	
+def mutateUtil(tour,mutateProb):
 	if random.random() < mutateProb:
-		maxlen = len(route)
-		split_1, split_2 = np.random.randint(0, maxlen-1), np.random.randint(0, maxlen-1)
-		while split_2 == split_1:
-			split_2 = np.random.randint(0, maxlen-1)	
-		split_1, split_2 = min(split_1, split_2), max(split_1, split_2)
+		maxlen = len(tour)
+		startidx, endidx = np.random.randint(0, maxlen-1), np.random.randint(0, maxlen-1)
+		while endidx == startidx:
+			endidx = np.random.randint(0, maxlen-1)	
+		startidx, endidx = min(startidx, endidx), max(startidx, endidx)
 		
-		mid = route[split_1:split_2+1]
+		mid = tour[startidx:endidx+1]
 		mid.reverse()
-		return route[:split_1] + mid + route[split_2+1:]
+		return tour[:startidx] + mid + tour[endidx+1:]
 	
-	return route
+	return tour
+
+def randomRoute(numPoints):
+	return random.sample(range(0,numPoints),numPoints)
 
 def routeCost(route, pointDist, flag=None):
 	cost = 0.0
@@ -85,11 +104,3 @@ def printRoute(route):
 	for city in route:
 		print city,
 	print ''
-
-
-# for i in range(len(route)):
-# 	if random.random() < mutateProb:
-# 		ind = np.random.randint(low=0,high=len(route))
-# 		temp = route[i]
-# 		route[i] = route[ind]
-# 		route[ind] = temp
